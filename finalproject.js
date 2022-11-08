@@ -28,7 +28,11 @@ export class FinalProject extends Scene {
 
     make_control_panel() {
         // Draw the scene's buttons, setup their actions and keyboard shortcuts, and monitor live measurements.
-        this.key_triggered_button("View solar system", ["Control", "0"], () => this.attached = () => this.planet_0);
+        // Redefine Jump function
+        this.key_triggered_button("Jump", [" "], () => this.attached = () => this.planet_0);
+        this.new_line();
+        // Add flag for first person POV as well (rewrite arrow function)
+        this.key_triggered_button("Change POV", ["x"], () => this.attached = () => this.default_pov);
         this.new_line();
     }
 
@@ -45,7 +49,7 @@ export class FinalProject extends Scene {
             Math.PI / 4, context.width / context.height, .1, 1000);
         
         // Resets to our initial solar system view (initial camera setting)
-        this.planet_0 = this.initial_camera_location;
+        this.default_pov = this.initial_camera_location;
         if (this.attached != undefined)
         {
             // Requirement 6 Implementation
