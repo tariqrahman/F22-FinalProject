@@ -11,15 +11,7 @@ export class FinalProject extends Scene {
 
         // At the beginning of our program, load one of each of these shape definitions onto the GPU.
         this.shapes = {
-            torus: new defs.Torus(15, 15),
-            torus2: new defs.Torus(3, 15),
-            f1: new (defs.Subdivision_Sphere.prototype.make_flat_shaded_version())(1),
-            f2: new (defs.Subdivision_Sphere.prototype.make_flat_shaded_version())(2),
-            s3: new defs.Subdivision_Sphere(3),
-            s4: new defs.Subdivision_Sphere(4),
-            circle: new defs.Regular_2D_Polygon(1, 15),
-            // TODO:  Fill in as many additional shape instances as needed in this key/value table.
-            //        (Requirement 1)
+    
         };
 
         // *** Materials
@@ -29,24 +21,6 @@ export class FinalProject extends Scene {
                 {ambient: .4, diffusivity: .6, color: hex_color("#ffffff")}),
             test2: new Material(new Gouraud_Shader(),
                 {ambient: .4, diffusivity: .6, color: hex_color("#992828")}),
-            ring: new Material(new Ring_Shader(), {ambient: 1, diffusivity: 0, specularity: 0, color: hex_color("#ffffff")}),
-            sun: new Material(new defs.Phong_Shader(),
-                {ambient: 1, diffusivity: 0, specularity: 0, color: hex_color("#ffffff")}),
-            moon: new Material(new defs.Phong_Shader(),
-                {ambient: 1, diffusivity: 1, specularity: 0, color: hex_color("#C7E4EE")}),
-            p1: new Material(new defs.Phong_Shader(),
-                {ambient: 0, diffusivity: 1, specularity: 0, color: hex_color("#808080")}),
-            p2: new Material(new defs.Phong_Shader(),
-                {ambient: 0, diffusivity: 0.25, specularity: 1, color: hex_color("#80FFFF")}),
-            p2_Gourad: new Material(new Gouraud_Shader(),
-                {ambient: 0, diffusivity: 0.25, specularity: 1, color: hex_color("#80FFFF")}),
-            p3: new Material(new defs.Phong_Shader(),
-                {ambient: 0, diffusivity: 1, specularity: 1, color: hex_color("#B08040")}),
-            p4: new Material(new defs.Phong_Shader(),
-                {ambient: 0, diffusivity: 0, specularity: 1, color: hex_color("#C7E4EE")}),
-            
-            // TODO:  Fill in as many additional material objects as needed in this key/value table.
-            //        (Requirement 4)
         }
 
         this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
@@ -56,13 +30,6 @@ export class FinalProject extends Scene {
         // Draw the scene's buttons, setup their actions and keyboard shortcuts, and monitor live measurements.
         this.key_triggered_button("View solar system", ["Control", "0"], () => this.attached = () => this.planet_0);
         this.new_line();
-        this.key_triggered_button("Attach to planet 1", ["Control", "1"], () => this.attached = () => this.planet_1);
-        this.key_triggered_button("Attach to planet 2", ["Control", "2"], () => this.attached = () => this.planet_2);
-        this.new_line();
-        this.key_triggered_button("Attach to planet 3", ["Control", "3"], () => this.attached = () => this.planet_3);
-        this.key_triggered_button("Attach to planet 4", ["Control", "4"], () => this.attached = () => this.planet_4);
-        this.new_line();
-        this.key_triggered_button("Attach to moon", ["Control", "m"], () => this.attached = () => this.moon);
     }
 
     display(context, program_state) {
@@ -91,71 +58,10 @@ export class FinalProject extends Scene {
             new_perspective = new_perspective.map((x, i) => Vector.from(program_state.camera_inverse[i]).mix(x,0.1));
             program_state.set_camera(new_perspective);
         }
-
-        // TODO: Create Planets (Requirement 1)
-        // this.shapes.[XXX].draw([XXX]) // <--example
-        const t = program_state.animation_time / 2000, dt = program_state.animation_delta_time / 1000;
-        let sun_radius = 2 + Math.sin((Math.PI * 2/5)*t - (Math.PI/2));
-        // TODO: Lighting (Requirement 2)
-        const light_position = vec4(0, 5, 5, 1);
-        // The parameters of the Light are: position, color, size
-        program_state.lights = [new Light(light_position, color(1, -0.5 + sun_radius / 2, -0.5 + sun_radius / 2, 1 ), 10**sun_radius)];
-
-        // TODO:  Fill in matrix operations and drawing code to draw the solar system scene (Requirements 3 and 4)
-        
-        model_transform = Mat4.identity().times(Mat4.scale(sun_radius, sun_radius, sun_radius));
-        const swampy = hex_color("#80FFFF")
-        const gray = hex_color("#808080")
-        const muddy = hex_color("#B08040")
-        const soft_blue = hex_color("#C7E4EE")
-        let sun_color = color(1, -0.5 + sun_radius / 2, -0.5 + sun_radius / 2, 1)
-
-        // Draw Sun
-        this.shapes.s4.draw(context, program_state, model_transform, this.materials.sun.override({color: sun_color}));
-        
-        // Draw First Planet
-        model_transform = model_transform.times(Mat4.scale(1 / sun_radius, 1 / sun_radius, 1 / sun_radius).times(Mat4.rotation(t, 0, 1, 0))).times(Mat4.translation(5, 0, 0));
-        this.shapes.f2.draw(context, program_state, model_transform, this.materials.p1.override({color: gray, diffusivity: 1}));
-        
-        this.planet_1 = model_transform;
-
-        // Draw Second Planet
-        model_transform = model_transform.times(Mat4.translation(-5, 0, 0)).times(Mat4.rotation(-t, 0, 1, 0)).times(Mat4.rotation(0.9*t, 0, 1, 0)).times(Mat4.translation(8,0,0));
-
-        // Alternate Shader on Even/Odd Seconds
-        if (parseInt(t) % 2 == 1) {
-            this.shapes.s3.draw(context, program_state, model_transform, this.materials.p2_Gourad.override({color: swampy, diffusivity: 0.25, specularity: 1}));
-        } else {
-            this.shapes.s3.draw(context, program_state, model_transform, this.materials.p2.override({color: swampy, diffusivity: 0.25, specularity: 1}));
-        }
-
-        this.planet_2 = model_transform;
-        
-        // Draw Third Planet
-        model_transform = model_transform.times(Mat4.translation(-8, 0, 0)).times(Mat4.rotation(-0.9*t, 0, 1, 0)).times(Mat4.rotation(0.5*t, 0, 1, 0)).times(Mat4.translation(11,0,0));
-        this.shapes.s4.draw(context, program_state, model_transform, this.materials.p3.override({color: muddy, diffusivity: 1, specularity: 0.5}));
-
-        this.planet_3 = model_transform;
-
-        // Draw Ring
-        model_transform = model_transform.times(Mat4.scale(3, 3, 0.2))
-        this.shapes.torus.draw(context, program_state, model_transform, this.materials.ring);
-
-        // Draw Fourth Planet
-        model_transform = model_transform.times(Mat4.scale(1 / 3, 1 / 3, 5)).times(Mat4.translation(-11, 0, 0)).times(Mat4.rotation(-0.5*t, 0, 1, 0)).times(Mat4.rotation(0.25*t, 0, 1, 0)).times(Mat4.translation(14,0,0));
-        this.shapes.s4.draw(context, program_state, model_transform, this.materials.p4.override({color: soft_blue, specularity: 1}));
-
-        this.planet_4 = model_transform;
-
-        // Draw Moon
-        model_transform = model_transform.times(Mat4.rotation(2 * t, 0, 1, 0)).times(Mat4.translation(2.5,0,0));
-        this.shapes.f1.draw(context, program_state, model_transform, this.materials.moon.override({color: soft_blue}));
-
-        this.moon = model_transform;
-        
     }
 }
 
+// Custom Shaders
 class Gouraud_Shader extends Shader {
     // This is a Shader using Phong_Shader as template
     // TODO: Modify the glsl coder here to create a Gouraud Shader (Planet 2)
@@ -305,6 +211,7 @@ class Gouraud_Shader extends Shader {
     }
 }
 
+// Delete later if needed
 class Ring_Shader extends Shader {
     update_GPU(context, gpu_addresses, graphics_state, model_transform, material) {
         // update_GPU():  Defining how to synchronize our JavaScript's variables to the GPU's:
