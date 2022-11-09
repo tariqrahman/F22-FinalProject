@@ -14,8 +14,13 @@ export class FinalProject extends Scene {
         // constructor(): Scenes begin by populating initial values like the Shapes and Materials they'll need.
         super();
 
+        // Set start key to false
+        this.start = false;
+        this.jump = false;
+
         // At the beginning of our program, load one of each of these shape definitions onto the GPU.
         this.shapes = {
+            bear: new defs.Cube(),
             tube: new defs.Cylindrical_Tube(15, 15, [[0, 1], [0, 1]]),
             ground: new defs.Cube(50, 50, [[0, 2], [0, 1]]),
 
@@ -47,9 +52,17 @@ export class FinalProject extends Scene {
 
     make_control_panel() {
         // Draw the scene's buttons, setup their actions and keyboard shortcuts, and monitor live measurements.
-        // Redefine Jump function
-        this.key_triggered_button("Jump", [" "], () => this.attached = () => this.planet_0);
+        // Start Key
+        this.key_triggered_button("Start", ["Enter"], () => {this.start = !this.start});
         this.new_line();
+
+        // Jump Key
+        this.key_triggered_button("Jump", [" "], ()=> this.jump = true, undefined, () => this.jump = false)
+        // this.key_triggered_button("Jump", [" "], () => {
+        //     this.jump = !this.jump;
+        // });
+        this.new_line();
+       
         // Add flag for first person POV as well (rewrite arrow function)
         this.key_triggered_button("Change POV", ["x"], () => this.attached = () => this.default_pov);
         this.new_line();
@@ -72,20 +85,35 @@ export class FinalProject extends Scene {
         program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
         
         // Drawing the ground
-        let ground_transform = model_transform.times(Mat4.rotation(Math.PI/2, 1, 0, 0))
-                                            .times(Mat4.translation(0, 10, 1))
-                                            .times(Mat4.scale(50, 12, 0));
-
-        this.shapes.ground.draw(context, program_state, ground_transform, this.floor);
+        let model_transform_ground = model_transform.times(Mat4.rotation(Math.PI/2, 1, 0, 0)).times(Mat4.translation(0, 10, 1)).times(Mat4.scale(50, 12, 0.5));
+        this.shapes.ground.draw(context, program_state, model_transform_ground, this.floor);
 
         const MAX_HEIGHT = 20; // total max height for both pipes
         for (let index = 0; index < this.NUM_PIPES; index++) {
             let pipe_height = this.pipe_heights[index];
-            let model_transform_bottom_tube = model_transform.times(Mat4.rotation(Math.PI/4, 1, 0, 0)).times(Mat4.translation(5 * index, 0, 0, 0)).times(Mat4.scale(1, 1, pipe_height)).times(Mat4.translation(-t/0.5, 0, 0, 0));
+            let model_transform_bottom_tube = model_transform.times(Mat4.rotation(Math.PI/4, 1, 0, 0)).times(Mat4.translation(7 * index, 0, 0, 0)).times(Mat4.scale(1, 1, pipe_height));
+            let model_transform_top_tube = model_transform.times(Mat4.rotation(Math.PI/4, 1, 0, 0)).times(Mat4.translation(7 * index, 0, -15, 0)).times(Mat4.scale(1, 1, MAX_HEIGHT - pipe_height));
+            if (this.start)
+            {
+                model_transform_bottom_tube = model_transform_bottom_tube.times(Mat4.translation(-t/0.5, 0, 0, 0))
+                model_transform_top_tube = model_transform_top_tube.times(Mat4.translation(-t/0.5, 0, 0, 0)) 
+            }
             this.shapes.tube.draw(context, program_state, model_transform_bottom_tube, this.materials.tube);
-            let model_transform_top_tube = model_transform.times(Mat4.rotation(Math.PI/4, 1, 0, 0)).times(Mat4.translation(5 * index, 0, -15, 0)).times(Mat4.scale(1, 1, MAX_HEIGHT - pipe_height)).times(Mat4.translation(-t/0.5, 0, 0, 0));
             this.shapes.tube.draw(context, program_state, model_transform_top_tube, this.materials.tube);
         }
+
+        // Defining the jump transformation
+        // let jump_trajectory = 5*Math.abs(Math.sin(Math.PI*0.5*t))
+        // let model_transform_bear = model_transform.times(Mat4.translation(0, 10, 1)).times(Mat4.scale(1, 0.5, 1))
+        // if (this.start)
+        // {
+        //     model_transform_bear = model_transform_bear.times(Mat4.translation(0, jump_trajectory, 0))
+        //     if (this.jump)
+        //     {
+        //         model_transform_bear = model_transform_bear.times(Mat4.translation(0, 2*jump_trajectory, 0))
+        //     }
+        // }
+        // this.shapes.bear.draw(context, program_state, model_transform_bear, this.materials.test)
         
         // Resets to our initial solar system view (initial camera setting)
         this.default_pov = this.initial_camera_location;
