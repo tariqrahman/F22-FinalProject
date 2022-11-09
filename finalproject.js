@@ -17,6 +17,8 @@ export class FinalProject extends Scene {
         // At the beginning of our program, load one of each of these shape definitions onto the GPU.
         this.shapes = {
             tube: new defs.Cylindrical_Tube(15, 15, [[0, 1], [0, 1]]),
+            ground: new defs.Cube(50, 50, [[0, 2], [0, 1]]),
+
         };
 
         // *** Materials
@@ -28,13 +30,19 @@ export class FinalProject extends Scene {
                 {ambient: .4, diffusivity: .6, color: hex_color("#992828")}),
             tube: new Material(new defs.Phong_Shader(),
                 {ambient: .4, diffusivity: .6, color: hex_color("76C13A")}),
+            ground: new Material(new Gouraud_Shader(), 
+                {ambient: .3, diffusivity: .9, color: hex_color("#D2B48C")}),
+    
         }
+
+        this.floor = new Material(new Gouraud_Shader(), 
+        {ambient: 0.3, diffusivity: .9, color: hex_color("#ffaf40")}),
 
         // Number of pipes
         this.NUM_PIPES = 100;
-        this.pipe_heights = Array.from({length: this.NUM_PIPES}, () => this.getRandomNum(7, 13));
+        this.pipe_heights = Array.from({length: this.NUM_PIPES}, () => this.getRandomNum(7, 14));
 
-        this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
+        this.initial_camera_location = Mat4.look_at(vec3(0, 45, 45), vec3(0, 20, 15), vec3(0, 1, 0));
     }
 
     make_control_panel() {
@@ -62,6 +70,13 @@ export class FinalProject extends Scene {
 
         const light_position = vec4(0, 10, 0, 1);
         program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
+        
+        // Drawing the ground
+        let ground_transform = model_transform.times(Mat4.rotation(Math.PI/2, 1, 0, 0))
+                                            .times(Mat4.translation(0, 10, 1))
+                                            .times(Mat4.scale(50, 12, 0));
+
+        this.shapes.ground.draw(context, program_state, ground_transform, this.floor);
 
         const MAX_HEIGHT = 20; // total max height for both pipes
         for (let index = 0; index < this.NUM_PIPES; index++) {
