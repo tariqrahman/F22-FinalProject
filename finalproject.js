@@ -30,7 +30,8 @@ export class FinalProject extends Scene {
                 {ambient: .4, diffusivity: .6, color: hex_color("76C13A")}),
         }
 
-        this.NUM_PIPES = 10;
+        // Number of pipes
+        this.NUM_PIPES = 100;
         this.pipe_heights = Array.from({length: this.NUM_PIPES}, () => this.getRandomNum(7, 13));
 
         this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
@@ -54,6 +55,7 @@ export class FinalProject extends Scene {
             // Define the global camera and projection matrices, which are stored in program_state.
             program_state.set_camera(this.initial_camera_location);
         }
+        let t = program_state.animation_time / 1000, dt = program_state.animation_delta_time / 1000;
         let model_transform = Mat4.identity()
         program_state.projection_transform = Mat4.perspective(
             Math.PI / 4, context.width / context.height, .1, 1000);
@@ -64,9 +66,9 @@ export class FinalProject extends Scene {
         const MAX_HEIGHT = 20; // total max height for both pipes
         for (let index = 0; index < this.NUM_PIPES; index++) {
             let pipe_height = this.pipe_heights[index];
-            let model_transform_bottom_tube = model_transform.times(Mat4.rotation(Math.PI/4, 1, 0, 0)).times(Mat4.translation(5 * index, 0, 0, 0)).times(Mat4.scale(1, 1, pipe_height));
+            let model_transform_bottom_tube = model_transform.times(Mat4.rotation(Math.PI/4, 1, 0, 0)).times(Mat4.translation(5 * index, 0, 0, 0)).times(Mat4.scale(1, 1, pipe_height)).times(Mat4.translation(-t/0.5, 0, 0, 0));
             this.shapes.tube.draw(context, program_state, model_transform_bottom_tube, this.materials.tube);
-            let model_transform_top_tube = model_transform.times(Mat4.rotation(Math.PI/4, 1, 0, 0)).times(Mat4.translation(5 * index, 0, -15, 0)).times(Mat4.scale(1, 1, MAX_HEIGHT - pipe_height));
+            let model_transform_top_tube = model_transform.times(Mat4.rotation(Math.PI/4, 1, 0, 0)).times(Mat4.translation(5 * index, 0, -15, 0)).times(Mat4.scale(1, 1, MAX_HEIGHT - pipe_height)).times(Mat4.translation(-t/0.5, 0, 0, 0));
             this.shapes.tube.draw(context, program_state, model_transform_top_tube, this.materials.tube);
         }
         
