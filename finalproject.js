@@ -5,13 +5,18 @@ const {
 } = tiny;
 
 export class FinalProject extends Scene {
+    // Random number generator
+    getRandomNum(min, max) {
+        return Math.random() * (max - min) + min;
+    }
+    
     constructor() {
         // constructor(): Scenes begin by populating initial values like the Shapes and Materials they'll need.
         super();
 
         // At the beginning of our program, load one of each of these shape definitions onto the GPU.
         this.shapes = {
-    
+            tube: new defs.Cylindrical_Tube(15, 15, [[0, 1], [0, 1]]),
         };
 
         // *** Materials
@@ -21,7 +26,12 @@ export class FinalProject extends Scene {
                 {ambient: .4, diffusivity: .6, color: hex_color("#ffffff")}),
             test2: new Material(new Gouraud_Shader(),
                 {ambient: .4, diffusivity: .6, color: hex_color("#992828")}),
+            tube: new Material(new defs.Phong_Shader(),
+                {ambient: .4, diffusivity: .6, color: hex_color("76C13A")}),
         }
+
+        this.NUM_PIPES = 10;
+        this.pipe_heights = Array.from({length: this.NUM_PIPES}, () => this.getRandomNum(7, 13));
 
         this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
     }
@@ -35,7 +45,7 @@ export class FinalProject extends Scene {
         this.key_triggered_button("Change POV", ["x"], () => this.attached = () => this.default_pov);
         this.new_line();
     }
-
+    
     display(context, program_state) {
         // display():  Called once per frame of animation.
         // Setup -- This part sets up the scene's overall camera matrix, projection matrix, and lights:
@@ -47,6 +57,18 @@ export class FinalProject extends Scene {
         let model_transform = Mat4.identity()
         program_state.projection_transform = Mat4.perspective(
             Math.PI / 4, context.width / context.height, .1, 1000);
+
+        const light_position = vec4(0, 10, 0, 1);
+        program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
+
+        const MAX_HEIGHT = 20; // total max height for both pipes
+        for (let index = 0; index < this.NUM_PIPES; index++) {
+            let pipe_height = this.pipe_heights[index];
+            let model_transform_bottom_tube = model_transform.times(Mat4.rotation(Math.PI/4, 1, 0, 0)).times(Mat4.translation(5 * index, 0, 0, 0)).times(Mat4.scale(1, 1, pipe_height));
+            this.shapes.tube.draw(context, program_state, model_transform_bottom_tube, this.materials.tube);
+            let model_transform_top_tube = model_transform.times(Mat4.rotation(Math.PI/4, 1, 0, 0)).times(Mat4.translation(5 * index, 0, -15, 0)).times(Mat4.scale(1, 1, MAX_HEIGHT - pipe_height));
+            this.shapes.tube.draw(context, program_state, model_transform_top_tube, this.materials.tube);
+        }
         
         // Resets to our initial solar system view (initial camera setting)
         this.default_pov = this.initial_camera_location;
