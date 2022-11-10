@@ -1,7 +1,9 @@
-import {defs, tiny} from './common.js';
+import {defs, tiny} from './examples/common.js';
+import { Shape_From_File } from './examples/obj-file-demo.js';
+import { Shadow_Textured_Phong_Shader } from './examples/shadow-demo-shader.js';
 
 const {
-    Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene,
+    Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene, Texture
 } = tiny;
 
 export class FinalProject extends Scene {
@@ -14,6 +16,8 @@ export class FinalProject extends Scene {
         // constructor(): Scenes begin by populating initial values like the Shapes and Materials they'll need.
         super();
 
+        const textured = new defs.Textured_Phong(1);
+
         // Set start key to false
         this.start = false;
         this.jump = false;
@@ -23,7 +27,8 @@ export class FinalProject extends Scene {
             bear: new defs.Cube(),
             tube: new defs.Cylindrical_Tube(15, 15, [[0, 1], [0, 1]]),
             ground: new defs.Cube(50, 50, [[0, 2], [0, 1]]),
-
+            sphere: new defs.Subdivision_Sphere(4),
+            cone: new defs.Closed_Cone(10,10),
         };
 
         // *** Materials
@@ -37,6 +42,16 @@ export class FinalProject extends Scene {
                 {ambient: .4, diffusivity: .6, color: hex_color("76C13A")}),
             ground: new Material(new Gouraud_Shader(), 
                 {ambient: .3, diffusivity: .9, color: hex_color("#D2B48C")}),
+            eye: new Material(new Gouraud_Shader(), 
+                {ambient: .3, diffusivity: .9, color: hex_color("#000000")}),
+            beak: new Material(new Gouraud_Shader(), 
+                {ambient: .3, diffusivity: .9, color: hex_color("#FFD580")}),
+            feather: new Material(textured,
+                {ambient: 1, diffusivity: 1, specularity: 0,  texture: new Texture("assets/feather.jpg")}),
+            // sand: new Material(new Shadow_Textured_Phong_Shader(1), 
+            //     {ambient: 0.3, diffusivity: .9, color: hex_color("#ffaf40"), smoothness: 64,
+            //     color_texture: new Texture("assets/sand.png"),
+            //     light_depth_texture: null}),
     
         }
 
@@ -47,6 +62,7 @@ export class FinalProject extends Scene {
         this.NUM_PIPES = 100;
         this.pipe_heights = Array.from({length: this.NUM_PIPES}, () => this.getRandomNum(7, 14));
 
+        this.initial_camera_location = Mat4.translation(5,-10,-30);
         this.initial_camera_location = Mat4.look_at(vec3(0, 45, 45), vec3(0, 20, 15), vec3(0, 1, 0));
     }
 
@@ -83,6 +99,24 @@ export class FinalProject extends Scene {
 
         const light_position = vec4(0, 10, 0, 1);
         program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
+
+
+
+        // Draw Bird Avatar
+
+        let model_transform_body = Mat4.identity().times(Mat4.scale(2,2,2));
+        this.shapes.sphere.draw(context, program_state,model_transform_body, this.materials.feather)
+
+        let model_transform_beak = Mat4.identity().times(Mat4.rotation(Math.PI / 2,0,1,0)).times(Mat4.translation(0,0,2));
+        this.shapes.cone.draw(context, program_state,model_transform_beak, this.materials.beak);
+
+        let model_transform_eye_back = Mat4.identity().times(Mat4.scale(.5,.5,.5)).times(Mat4.translation(2,2,-2));
+        this.shapes.sphere.draw(context, program_state,model_transform_eye_back, this.materials.eye)
+
+        let model_transform_eye_front = Mat4.identity().times(Mat4.scale(.5,.5,.5)).times(Mat4.translation(2,3,0));
+        this.shapes.sphere.draw(context, program_state,model_transform_eye_front, this.materials.eye)
+
+
         
         // Drawing the ground
         let model_transform_ground = model_transform.times(Mat4.rotation(Math.PI/2, 1, 0, 0)).times(Mat4.translation(0, 10, 1)).times(Mat4.scale(50, 12, 0.5));
@@ -131,6 +165,21 @@ export class FinalProject extends Scene {
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Custom Shaders
 class Gouraud_Shader extends Shader {
