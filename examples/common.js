@@ -1,5 +1,5 @@
-import {tiny} from './tiny-graphics.js';
-import {widgets} from './tiny-graphics-widgets.js';
+import {tiny} from '../tiny-graphics.js';
+import {widgets} from '../tiny-graphics-widgets.js';
 // Pull these names into this module's scope for convenience:
 const {
     Vector, Vector3, vec, vec3, vec4, color, Matrix, Mat4,
