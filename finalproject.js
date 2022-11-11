@@ -57,7 +57,7 @@ export class FinalProject extends Scene {
         this.new_line();
 
         // Jump Key
-        this.key_triggered_button("Jump", [" "], ()=> this.jump = true, undefined, () => this.jump = false)
+        this.key_triggered_button("Jump", [" "], () => this.jump = true, undefined, () => this.jump = false)
         // this.key_triggered_button("Jump", [" "], () => {
         //     this.jump = !this.jump;
         // });
