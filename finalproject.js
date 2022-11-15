@@ -60,7 +60,8 @@ export class FinalProject extends Scene {
 
         // Number of pipes
         this.NUM_PIPES = 100;
-        this.pipe_heights = Array.from({length: this.NUM_PIPES}, () => this.getRandomNum(7, 14));
+        this.pipe_heights = Array.from({length: this.NUM_PIPES}, () => this.getRandomNum(-5, -10)); // height off base level
+        this.pipe_gaps = Array.from({length: this.NUM_PIPES}, () => this.getRandomNum(-25, -30)); // gap size between pipes
 
         this.initial_camera_location = Mat4.translation(5,-10,-30);
         this.initial_camera_location = Mat4.look_at(vec3(0, 45, 45), vec3(0, 20, 15), vec3(0, 1, 0));
@@ -125,8 +126,13 @@ export class FinalProject extends Scene {
         const MAX_HEIGHT = 20; // total max height for both pipes
         for (let index = 0; index < this.NUM_PIPES; index++) {
             let pipe_height = this.pipe_heights[index];
-            let model_transform_bottom_tube = model_transform.times(Mat4.rotation(Math.PI/4, 1, 0, 0)).times(Mat4.translation(7 * index, 0, 0, 0)).times(Mat4.scale(1, 1, pipe_height));
-            let model_transform_top_tube = model_transform.times(Mat4.rotation(Math.PI/4, 1, 0, 0)).times(Mat4.translation(7 * index, 0, -15, 0)).times(Mat4.scale(1, 1, MAX_HEIGHT - pipe_height));
+            let pipe_gap = this.pipe_gaps[index];
+            // This version does not align pipe bases, but maintains an adequate gap between pipes that is constantly shifted
+            let model_transform_bottom_tube = model_transform.times(Mat4.rotation(Math.PI/4, 1, 0, 0)).times(Mat4.translation(7 * index, 0, pipe_height, 0)).times(Mat4.scale(1, 1, MAX_HEIGHT));
+            let model_transform_top_tube = model_transform.times(Mat4.rotation(Math.PI/4, 1, 0, 0)).times(Mat4.translation(7 * index, 0, pipe_height + pipe_gap, 0)).times(Mat4.scale(1, 1, MAX_HEIGHT));
+            // This version does align pipe bases, but makes gameplay far too easy owing to pipe symmetry
+            // let model_transform_bottom_tube = model_transform.times(Mat4.rotation(Math.PI/4, 1, 0, 0)).times(Mat4.translation(7 * index, 0, pipe_height, 0)).times(Mat4.scale(1, 1, 2 * pipe_height));
+            // let model_transform_top_tube = model_transform.times(Mat4.rotation(Math.PI/4, 1, 0, 0)).times(Mat4.translation(7 * index, 0, -2 * MAX_HEIGHT - pipe_height, 0)).times(Mat4.scale(1, 1, -2 * pipe_height));
             if (this.start)
             {
                 model_transform_bottom_tube = model_transform_bottom_tube.times(Mat4.translation(-t/0.5, 0, 0, 0))
