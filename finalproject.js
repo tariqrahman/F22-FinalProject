@@ -58,6 +58,9 @@ export class FinalProject extends Scene {
 
         this.floor = new Material(new Gouraud_Shader(), 
         {ambient: 0.3, diffusivity: .9, color: hex_color("#ffaf40")}),
+
+        this.sky = new Material(new Gouraud_Shader(), 
+        {ambient: 0.3, diffusivity: .9, color: hex_color("#87CEEB")}),
             
         // Number of pipes
         this.NUM_PIPES = 100;
@@ -96,6 +99,7 @@ export class FinalProject extends Scene {
         program_state.projection_transform = Mat4.perspective(
             Math.PI / 4, context.width / context.height, .1, 1000);
 
+        // need more lighting for sky backdrop
         const light_position = vec4(0, 10, 0, 1);
         program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
 
@@ -125,8 +129,10 @@ export class FinalProject extends Scene {
 
         
         // Drawing the ground
-        let model_transform_ground = model_transform.times(Mat4.rotation(Math.PI/2, 1, 0, 0)).times(Mat4.translation(0, 10, 1)).times(Mat4.scale(50, 12, 0.5));
+        let model_transform_ground = model_transform.times(Mat4.rotation(Math.PI/2, 1, 0, 0)).times(Mat4.translation(0, 10, 1)).times(Mat4.scale(100, 20, 0.5));
         this.shapes.ground.draw(context, program_state, model_transform_ground, this.floor);
+        let model_transform_sky = model_transform.times(Mat4.translation(0, 10, -10)).times(Mat4.scale(100, 60, 0.5));
+        this.shapes.ground.draw(context, program_state, model_transform_sky, this.sky);
 
         const MAX_HEIGHT = 20; // total max height for both pipes
         for (let index = 2; index < this.NUM_PIPES; index++) { // start from 2 so bird has time to jump
