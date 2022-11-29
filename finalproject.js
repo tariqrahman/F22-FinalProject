@@ -30,6 +30,7 @@ export class FinalProject extends Scene {
             ground: new defs.Cube(50, 50, [[0, 2], [0, 1]]),
             sphere: new defs.Subdivision_Sphere(4),
             cone: new defs.Closed_Cone(10,10),
+            box: new defs.Square(),
         };
 
         // *** Materials
@@ -49,10 +50,32 @@ export class FinalProject extends Scene {
                 {ambient: .3, diffusivity: .9, color: hex_color("#FFD580")}),
             feather: new Material(textured,
                 {ambient: 1, diffusivity: 1, specularity: 0,  texture: new Texture("assets/feather.jpg")}),
+            // sky: new Material(textured,
+            //     {ambient: .3, diffusivity: .9, texture: new Texture("assets/sky.jpeg")}),
             // sand: new Material(new Shadow_Textured_Phong_Shader(1), 
             //     {ambient: 0.3, diffusivity: .9, color: hex_color("#ffaf40"), smoothness: 64,
             //     color_texture: new Texture("assets/sand.png"),
             //     light_depth_texture: null}),
+            score0: new Material(textured, 
+                {ambient: 1, texture: new Texture("assets/numbers/0.png"), color: color(0, 0, 0, 1)}),
+            score1: new Material(textured, 
+                {ambient: 1, texture: new Texture("assets/numbers/1.png"), color: color(0, 0, 0, 1)}),
+            score2: new Material(textured, 
+                {ambient: 1, texture: new Texture("assets/numbers/2.png"), color: color(0, 0, 0, 1)}),
+            score3: new Material(textured, 
+                {ambient: 1, texture: new Texture("assets/numbers/3.png"), color: color(0, 0, 0, 1)}),
+            score4: new Material(textured, 
+                {ambient: 1, texture: new Texture("assets/numbers/4.png"), color: color(0, 0, 0, 1)}),
+            score5: new Material(textured, 
+                {ambient: 1, texture: new Texture("assets/numbers/5.png"), color: color(0, 0, 0, 1)}),
+            score6: new Material(textured, 
+                {ambient: 1, texture: new Texture("assets/numbers/6.png"), color: color(0, 0, 0, 1)}),
+            score7: new Material(textured, 
+                {ambient: 1, texture: new Texture("assets/numbers/7.png"), color: color(0, 0, 0, 1)}),
+            score8: new Material(textured, 
+                {ambient: 1, texture: new Texture("assets/numbers/8.png"), color: color(0, 0, 0, 1)}),
+            score9: new Material(textured, 
+                {ambient: 1, texture: new Texture("assets/numbers/9.png"), color: color(0, 0, 0, 1)}),
     
         }
 
@@ -154,7 +177,48 @@ export class FinalProject extends Scene {
             this.shapes.tube.draw(context, program_state, model_transform_bottom_tube, this.materials.tube);
             this.shapes.tube.draw(context, program_state, model_transform_top_tube, this.materials.tube);
         }
+        
         // console.log(score);
+        let n_digits = 0;
+        while (score > 0) {
+            let last_digit = score % 10;
+            let model_transform_score = model_transform.times(Mat4.translation(n_digits * -2, 35, 5, 0));
+            
+            switch(last_digit) {
+                case 0:
+                    this.shapes.box.draw(context, program_state, model_transform_score, this.materials.score0)
+                    break;
+                case 1:
+                    this.shapes.box.draw(context, program_state, model_transform_score, this.materials.score1)
+                    break;
+                case 2:
+                    this.shapes.box.draw(context, program_state, model_transform_score, this.materials.score2)
+                    break;
+                case 3:
+                    this.shapes.box.draw(context, program_state, model_transform_score, this.materials.score3)
+                    break;
+                case 4:
+                    this.shapes.box.draw(context, program_state, model_transform_score, this.materials.score4)
+                    break;
+                case 5:
+                    this.shapes.box.draw(context, program_state, model_transform_score, this.materials.score5)
+                    break;
+                case 6:
+                    this.shapes.box.draw(context, program_state, model_transform_score, this.materials.score6)
+                    break;
+                case 7:
+                    this.shapes.box.draw(context, program_state, model_transform_score, this.materials.score7)
+                    break;
+                case 8:
+                    this.shapes.box.draw(context, program_state, model_transform_score, this.materials.score8)
+                    break;
+                case 9:
+                    this.shapes.box.draw(context, program_state, model_transform_score, this.materials.score9)
+                    break;
+            }
+        n_digits += 1;
+        score = Math.floor(score/10);
+        }
         
         // Resets to our initial solar system view (initial camera setting)
         this.default_pov = this.initial_camera_location;
