@@ -51,12 +51,8 @@ export class FinalProject extends Scene {
                 {ambient: .3, diffusivity: .9, color: hex_color("#FFD580")}),
             feather: new Material(textured,
                 {ambient: 1, diffusivity: 1, specularity: 0,  texture: new Texture("assets/feather.jpg")}),
-            // sky: new Material(textured,
-            //     {ambient: .3, diffusivity: .9, texture: new Texture("assets/sky.jpeg")}),
-            // sand: new Material(new Shadow_Textured_Phong_Shader(1), 
-            //     {ambient: 0.3, diffusivity: .9, color: hex_color("#ffaf40"), smoothness: 64,
-            //     color_texture: new Texture("assets/sand.png"),
-            //     light_depth_texture: null}),
+            sky: new Material(textured,
+                {ambient: .7, diffusivity: .9, texture: new Texture("assets/sky.jpeg")}),
             score0: new Material(textured, 
                 {ambient: 1, texture: new Texture("assets/numbers/0.png"), color: color(0, 0, 0, 1)}),
             score1: new Material(textured, 
@@ -127,7 +123,7 @@ export class FinalProject extends Scene {
             Math.PI / 4, context.width / context.height, .1, 1000);
 
         // need more lighting for sky backdrop
-        const light_position = vec4(0, 10, 0, 1);
+        const light_position = vec4(0, 10, -10, 1);
         program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
 
 
@@ -160,7 +156,7 @@ export class FinalProject extends Scene {
         let model_transform_ceiling = model_transform.times(Mat4.rotation(Math.PI/2, 1, 0, 0)).times(Mat4.translation(0, 10, -45)).times(Mat4.scale(100, 20, 0.5));
         this.shapes.ground.draw(context, program_state, model_transform_ceiling, this.floor);
         let model_transform_sky = model_transform.times(Mat4.translation(0, 10, -10)).times(Mat4.scale(100, 60, 0.5));
-        this.shapes.ground.draw(context, program_state, model_transform_sky, this.sky);
+        this.shapes.ground.draw(context, program_state, model_transform_sky, this.materials.sky);
 
 
         let score = 0;
