@@ -23,6 +23,7 @@ export class FinalProject extends Scene {
         this.jump = false;
         this.jump_height = 0;
         this.difficult = false;
+        this.start_time = Number.POSITIVE_INFINITY;
 
         // At the beginning of our program, load one of each of these shape definitions onto the GPU.
         this.shapes = {
@@ -78,17 +79,14 @@ export class FinalProject extends Scene {
 
         this.floor = new Material(new Gouraud_Shader(), 
         {ambient: 0.3, diffusivity: .9, color: hex_color("#ffaf40")}),
-
-        this.sky = new Material(new Gouraud_Shader(), 
-        {ambient: 0.3, diffusivity: .9, color: hex_color("#87CEEB")}),
             
         // Number of pipes
         this.NUM_PIPES = 100;
         this.pipe_heights = Array.from({length: this.NUM_PIPES}, () => this.getRandomNum(-5, -10)); // height off base level
         this.pipe_gaps = Array.from({length: this.NUM_PIPES}, () => this.getRandomNum(-25, -30)); // gap size between pipes
 
-        this.initial_camera_location = Mat4.translation(5,-10,-30);
-        this.initial_camera_location = Mat4.look_at(vec3(0, 45, 45), vec3(0, 20, 15), vec3(0, 1, 0));
+        // this.initial_camera_location = Mat4.translation(5,-10,-30);
+        this.initial_camera_location = Mat4.look_at(vec3(0, 30, 60), vec3(0, 20, 15), vec3(0, 1, 0));
     }
 
     make_control_panel() {
@@ -105,7 +103,17 @@ export class FinalProject extends Scene {
         this.key_triggered_button("Change POV", ["x"], () => this.attached = () => this.default_pov);
         this.new_line();
 
+        // Add multiple difficulties
         this.key_triggered_button("Toggle Hard Mode", ["h"], () => {this.difficult = !this.difficult});
+        this.new_line();
+
+        this.key_triggered_button("Reset", ["e"], () => {
+            this.start = false;
+            this.jump = false;
+            this.jump_height = 0;
+            this.difficult = false;
+            this.start_time = Number.POSITIVE_INFINITY;
+        });
         this.new_line();
     }
     
@@ -151,7 +159,7 @@ export class FinalProject extends Scene {
 
         
         // Drawing the ground
-        let model_transform_ground = model_transform.times(Mat4.rotation(Math.PI/2, 1, 0, 0)).times(Mat4.translation(0, 10, 1)).times(Mat4.scale(100, 20, 0.5));
+        let model_transform_ground = model_transform.times(Mat4.rotation(Math.PI/2, 1, 0, 0)).times(Mat4.translation(0, 10, -2)).times(Mat4.scale(100, 20, 0.5));
         this.shapes.ground.draw(context, program_state, model_transform_ground, this.floor);
         let model_transform_ceiling = model_transform.times(Mat4.rotation(Math.PI/2, 1, 0, 0)).times(Mat4.translation(0, 10, -45)).times(Mat4.scale(100, 20, 0.5));
         this.shapes.ground.draw(context, program_state, model_transform_ceiling, this.floor);
@@ -175,8 +183,10 @@ export class FinalProject extends Scene {
             
             if (this.start)
             { // need to change this approach so t starts only when the start button is hit
-                model_transform_bottom_tube = model_transform_bottom_tube.times(Mat4.translation(-t/0.5, 0, 0, 0))
-                model_transform_top_tube = model_transform_top_tube.times(Mat4.translation(-t/0.5, 0, 0, 0))
+                this.start_time = Math.min(this.start_time, t)
+                let shift = -(t - this.start_time)/0.5;
+                model_transform_bottom_tube = model_transform_bottom_tube.times(Mat4.translation(shift, 0, 0, 0))
+                model_transform_top_tube = model_transform_top_tube.times(Mat4.translation(shift, 0, 0, 0))
             }
             
             let x_coord = model_transform_bottom_tube[0][3];
