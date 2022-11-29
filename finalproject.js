@@ -22,6 +22,7 @@ export class FinalProject extends Scene {
         this.start = false;
         this.jump = false;
         this.jump_height = 0;
+        this.difficult = false;
 
         // At the beginning of our program, load one of each of these shape definitions onto the GPU.
         this.shapes = {
@@ -107,6 +108,9 @@ export class FinalProject extends Scene {
         // Add flag for first person POV as well (rewrite arrow function)
         this.key_triggered_button("Change POV", ["x"], () => this.attached = () => this.default_pov);
         this.new_line();
+
+        this.key_triggered_button("Toggle Hardcore Mode", ["h"], () => {this.difficult = !this.difficult});
+        this.new_line();
     }
     
     display(context, program_state) {
@@ -159,17 +163,24 @@ export class FinalProject extends Scene {
 
         let score = 0;
         const MAX_HEIGHT = 20; // total max height for both pipes
+        let difficulty_adjustment = -MAX_HEIGHT/8;
+        if (!this.difficult) {
+            difficulty_adjustment = -MAX_HEIGHT/4;
+        }
+        
         for (let index = 2; index < this.NUM_PIPES; index++) { // start from 2 so bird has time to jump
             let pipe_height = this.pipe_heights[index];
             let pipe_gap = this.pipe_gaps[index];
-            // This version does not align pipe bases, but maintains an adequate gap between pipes that is constantly shifted
+            
             let model_transform_bottom_tube = model_transform.times(Mat4.rotation(Math.PI/2, 1, 0, 0)).times(Mat4.translation(7 * index, 0, pipe_height, 0)).times(Mat4.scale(1, 1, MAX_HEIGHT));
-            let model_transform_top_tube = model_transform.times(Mat4.rotation(Math.PI/2, 1, 0, 0)).times(Mat4.translation(7 * index, 0, pipe_height + pipe_gap - MAX_HEIGHT/4, 0)).times(Mat4.scale(1, 1, MAX_HEIGHT));
+            let model_transform_top_tube = model_transform.times(Mat4.rotation(Math.PI/2, 1, 0, 0)).times(Mat4.translation(7 * index, 0, pipe_height + pipe_gap + difficulty_adjustment, 0)).times(Mat4.scale(1, 1, MAX_HEIGHT));
+            
             if (this.start)
             { // need to change this approach so t starts only when the start button is hit
                 model_transform_bottom_tube = model_transform_bottom_tube.times(Mat4.translation(-t/0.5, 0, 0, 0))
                 model_transform_top_tube = model_transform_top_tube.times(Mat4.translation(-t/0.5, 0, 0, 0))
             }
+            
             let x_coord = model_transform_bottom_tube[0][3];
             if (x_coord <= 0) {
                 score += 1;
