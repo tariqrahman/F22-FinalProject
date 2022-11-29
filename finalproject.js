@@ -109,7 +109,7 @@ export class FinalProject extends Scene {
         this.key_triggered_button("Change POV", ["x"], () => this.attached = () => this.default_pov);
         this.new_line();
 
-        this.key_triggered_button("Toggle Hardcore Mode", ["h"], () => {this.difficult = !this.difficult});
+        this.key_triggered_button("Toggle Hard Mode", ["h"], () => {this.difficult = !this.difficult});
         this.new_line();
     }
     
@@ -157,6 +157,8 @@ export class FinalProject extends Scene {
         // Drawing the ground
         let model_transform_ground = model_transform.times(Mat4.rotation(Math.PI/2, 1, 0, 0)).times(Mat4.translation(0, 10, 1)).times(Mat4.scale(100, 20, 0.5));
         this.shapes.ground.draw(context, program_state, model_transform_ground, this.floor);
+        let model_transform_ceiling = model_transform.times(Mat4.rotation(Math.PI/2, 1, 0, 0)).times(Mat4.translation(0, 10, -45)).times(Mat4.scale(100, 20, 0.5));
+        this.shapes.ground.draw(context, program_state, model_transform_ceiling, this.floor);
         let model_transform_sky = model_transform.times(Mat4.translation(0, 10, -10)).times(Mat4.scale(100, 60, 0.5));
         this.shapes.ground.draw(context, program_state, model_transform_sky, this.sky);
 
