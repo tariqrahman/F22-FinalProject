@@ -126,7 +126,6 @@ export class FinalProject extends Scene {
         let model_transform_eye_front = model_transform_bird.times(Mat4.scale(.5,.5,.5)).times(Mat4.translation(2,3,0));
         this.shapes.sphere.draw(context, program_state,model_transform_eye_front, this.materials.eye)
 
-
         
         // Drawing the ground
         let model_transform_ground = model_transform.times(Mat4.rotation(Math.PI/2, 1, 0, 0)).times(Mat4.translation(0, 10, 1)).times(Mat4.scale(100, 20, 0.5));
@@ -134,6 +133,8 @@ export class FinalProject extends Scene {
         let model_transform_sky = model_transform.times(Mat4.translation(0, 10, -10)).times(Mat4.scale(100, 60, 0.5));
         this.shapes.ground.draw(context, program_state, model_transform_sky, this.sky);
 
+
+        let score = 0;
         const MAX_HEIGHT = 20; // total max height for both pipes
         for (let index = 2; index < this.NUM_PIPES; index++) { // start from 2 so bird has time to jump
             let pipe_height = this.pipe_heights[index];
@@ -144,11 +145,16 @@ export class FinalProject extends Scene {
             if (this.start)
             { // need to change this approach so t starts only when the start button is hit
                 model_transform_bottom_tube = model_transform_bottom_tube.times(Mat4.translation(-t/0.5, 0, 0, 0))
-                model_transform_top_tube = model_transform_top_tube.times(Mat4.translation(-t/0.5, 0, 0, 0)) 
+                model_transform_top_tube = model_transform_top_tube.times(Mat4.translation(-t/0.5, 0, 0, 0))
+            }
+            let x_coord = model_transform_bottom_tube[0][3];
+            if (x_coord <= 0) {
+                score += 1;
             }
             this.shapes.tube.draw(context, program_state, model_transform_bottom_tube, this.materials.tube);
             this.shapes.tube.draw(context, program_state, model_transform_top_tube, this.materials.tube);
         }
+        // console.log(score);
         
         // Resets to our initial solar system view (initial camera setting)
         this.default_pov = this.initial_camera_location;
