@@ -23,6 +23,7 @@ export class FinalProject extends Scene {
         this.jump = false;
         this.jump_height = 0;
         this.difficult = false;
+        this.fall_speed = 0.06;
         this.start_time = Number.POSITIVE_INFINITY;
 
         // At the beginning of our program, load one of each of these shape definitions onto the GPU.
@@ -107,6 +108,14 @@ export class FinalProject extends Scene {
         this.key_triggered_button("Toggle Hard Mode", ["h"], () => {this.difficult = !this.difficult});
         this.new_line();
 
+        
+        this.key_triggered_button("-", ["j"], () => {this.fall_speed = Math.max(0.03, this.fall_speed - 0.01)});
+        this.live_string(box => {
+                box.textContent = "Fall Speed: " + Math.round((this.fall_speed * 100)) / 100});
+        this.key_triggered_button("+", ["u"], () => {this.fall_speed += 0.01});
+        this.new_line();
+
+        // Reset button
         this.key_triggered_button("Reset", ["e"], () => {
             this.start = false;
             this.jump = false;
@@ -138,7 +147,7 @@ export class FinalProject extends Scene {
 
         // Draw Bird Avatar
         if (this.start) {
-          this.jump_height -= 0.1;  
+          this.jump_height -= this.fall_speed;
         }
         let model_transform_bird = model_transform.times(Mat4.translation(0, 20 + this.jump_height, 0));
         if (this.jump) {
