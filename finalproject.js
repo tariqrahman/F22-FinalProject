@@ -7,7 +7,8 @@ const {
 } = tiny;
 
 export class FinalProject extends Scene {
-    // Random number generator
+   
+ // Random number generator
     getRandomNum(min, max) {
         return Math.random() * (max - min) + min;
     }
@@ -37,7 +38,6 @@ export class FinalProject extends Scene {
         };
 
         // *** Materials
-
         this.materials = {
             test: new Material(new defs.Phong_Shader(),
                 {ambient: .4, diffusivity: .6, color: hex_color("#ffffff")}),
@@ -83,8 +83,8 @@ export class FinalProject extends Scene {
             
         // Number of pipes
         this.NUM_PIPES = 100;
-        this.pipe_heights = Array.from({length: this.NUM_PIPES}, () => this.getRandomNum(-5, -10)); // height off base level
-        this.pipe_gaps = Array.from({length: this.NUM_PIPES}, () => this.getRandomNum(-25, -30)); // gap size between pipes
+        this.pipe_heights = Array.from({length: this.NUM_PIPES}, () => this.getRandomNum(0, -15)); // height off base level
+        this.pipe_gaps = Array.from({length: this.NUM_PIPES}, () => this.getRandomNum(-25, -25)); // gap size between pipes
 
         // this.initial_camera_location = Mat4.translation(5,-10,-30);
         this.initial_camera_location = Mat4.look_at(vec3(0, 20, 60), vec3(0, 17, 15), vec3(0, 1 , 0));
@@ -100,14 +100,17 @@ export class FinalProject extends Scene {
         this.key_triggered_button("Jump", [" "], () => {this.jump_height += 2});
         this.new_line();
        
-        // Add flag for first person POV as well (rewrite arrow function)
-        this.key_triggered_button("Change POV", ["x"], () => this.attached = () => this.default_pov);
+        // Default POV
+        this.key_triggered_button("Default view", ["x"], () => this.attached = () => this.default_pov);
+        this.new_line();
+
+        // Change POV to bird
+        this.key_triggered_button("Bird view", ["v"], () => this.attached = () => this.bird_pov);
         this.new_line();
 
         // Add multiple difficulties
         this.key_triggered_button("Toggle Hard Mode", ["h"], () => {this.difficult = !this.difficult});
         this.new_line();
-
         
         this.key_triggered_button("-", ["j"], () => {this.fall_speed = Math.max(0.03, this.fall_speed - 0.01)});
         this.live_string(box => {
@@ -143,8 +146,6 @@ export class FinalProject extends Scene {
         const light_position = vec4(0, 10, -10, 1);
         program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
 
-
-
         // Draw Bird Avatar
         if (this.start) {
           this.jump_height -= this.fall_speed;
@@ -165,7 +166,8 @@ export class FinalProject extends Scene {
 
         let model_transform_eye_front = model_transform_bird.times(Mat4.scale(.5,.5,.5)).times(Mat4.translation(2,3,0));
         this.shapes.sphere.draw(context, program_state,model_transform_eye_front, this.materials.eye)
-
+       
+        this.bird_pov = model_transform_beak.times(Mat4.rotation(Math.PI, 0, 1, 0)).times(Mat4.translation(0,0,-7))
         
         // Drawing the ground
         let model_transform_ground = model_transform.times(Mat4.rotation(Math.PI/2, 1, 0, 0)).times(Mat4.translation(0, 10, -2)).times(Mat4.scale(100, 20, 0.5));
@@ -183,7 +185,7 @@ export class FinalProject extends Scene {
             difficulty_adjustment = -MAX_HEIGHT/4;
         }
         
-        for (let index = 2; index < this.NUM_PIPES; index++) { // start from 2 so bird has time to jump
+        for (let index = 2; index < this.NUM_PIPES; index ++) { // start from 2 so bird has time to jump
             let pipe_height = this.pipe_heights[index];
             let pipe_gap = this.pipe_gaps[index];
             
@@ -248,13 +250,12 @@ export class FinalProject extends Scene {
         score = Math.floor(score/10);
         }
         
-        // Resets to our initial solar system view (initial camera setting)
+        // Resets to our initial world view (initial camera setting) or changes to bird POV
         this.default_pov = this.initial_camera_location;
         if (this.attached != undefined)
         {
-            // Requirement 6 Implementation
             let new_perspective = this.attached();
-            if(new_perspective !== this.planet_0)
+            if(new_perspective !== this.default_pov)
             {
                 new_perspective = new_perspective.times(Mat4.translation(0,0,5));
                 new_perspective = Mat4.inverse(new_perspective);
