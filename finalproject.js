@@ -35,6 +35,7 @@ export class FinalProject extends Scene {
             sphere: new defs.Subdivision_Sphere(4),
             cone: new defs.Closed_Cone(10,10),
             box: new defs.Square(),
+            "flappy": new Shape_From_File("assets/flappy.obj")
         };
 
         // *** Materials
@@ -54,7 +55,9 @@ export class FinalProject extends Scene {
             feather: new Material(textured,
                 {ambient: 1, diffusivity: 1, specularity: 0,  texture: new Texture("assets/feather.jpg")}),
             sky: new Material(textured,
-                {ambient: .7, diffusivity: .9, texture: new Texture("assets/sky.jpeg")}),
+                {ambient: .7, diffusivity: .9, texture: new Texture("assets/flappy_backgrond.png")}),
+            flappy: new Material(textured,
+                    {ambient: .7, diffusivity: .9, texture: new Texture("assets/flappy_bird-00.png")}),
             score0: new Material(textured, 
                 {ambient: 1, texture: new Texture("assets/numbers/0.png"), color: color(0, 0, 0, 1)}),
             score1: new Material(textured, 
@@ -155,27 +158,27 @@ export class FinalProject extends Scene {
             model_transform_bird = model_transform_bird.times(Mat4.translation(0, this.jump_height, 0))
         }
 
-        let model_transform_body = model_transform_bird.times(Mat4.scale(2,2,2));
-        this.shapes.sphere.draw(context, program_state,model_transform_body, this.materials.feather)
-
-        let model_transform_beak = model_transform_bird.times(Mat4.rotation(Math.PI / 2,0,1,0)).times(Mat4.translation(0,0,2));
-        this.shapes.cone.draw(context, program_state,model_transform_beak, this.materials.beak);
-
-        let model_transform_eye_back = model_transform_bird.times(Mat4.scale(.5,.5,.5)).times(Mat4.translation(2,2,-2));
-        this.shapes.sphere.draw(context, program_state,model_transform_eye_back, this.materials.eye)
-
-        let model_transform_eye_front = model_transform_bird.times(Mat4.scale(.5,.5,.5)).times(Mat4.translation(2,3,0));
-        this.shapes.sphere.draw(context, program_state,model_transform_eye_front, this.materials.eye)
+        let model_transform_bird_pov = model_transform_bird.times(Mat4.rotation(Math.PI / 2,0,1,0)).times(Mat4.translation(0,0,2).times(Mat4.rotation(Math.PI, 0, 1, 0)).times(Mat4.translation(0,0,-7)));
        
-        this.bird_pov = model_transform_beak.times(Mat4.rotation(Math.PI, 0, 1, 0)).times(Mat4.translation(0,0,-7))
+        this.bird_pov = model_transform_bird_pov;
+        model_transform_bird = model_transform_bird.times(Mat4.scale(1.25,1.25,1.25))
+        this.shapes.flappy.draw(context, program_state, model_transform_bird, this.materials.flappy);
         
         // Drawing the ground
         let model_transform_ground = model_transform.times(Mat4.rotation(Math.PI/2, 1, 0, 0)).times(Mat4.translation(0, 10, -2)).times(Mat4.scale(100, 20, 0.5));
         this.shapes.ground.draw(context, program_state, model_transform_ground, this.floor);
         let model_transform_ceiling = model_transform.times(Mat4.rotation(Math.PI/2, 1, 0, 0)).times(Mat4.translation(0, 10, -45)).times(Mat4.scale(100, 20, 0.5));
         this.shapes.ground.draw(context, program_state, model_transform_ceiling, this.floor);
-        let model_transform_sky = model_transform.times(Mat4.translation(0, 10, -10)).times(Mat4.scale(100, 60, 0.5));
-        this.shapes.ground.draw(context, program_state, model_transform_sky, this.materials.sky);
+
+        let start_x = -50
+        
+        for (let index = 0; index < 25; index++) {
+            let model_transform_sky = model_transform.times(Mat4.translation(start_x, 25, -10)).times(Mat4.scale(25, 25, 0.5));
+            this.shapes.ground.draw(context, program_state, model_transform_sky, this.materials.sky);
+            start_x = start_x + 50
+        }
+       
+        
 
 
         let score = 0;
