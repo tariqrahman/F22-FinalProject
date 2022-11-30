@@ -150,7 +150,7 @@ export class FinalProject extends Scene {
             Math.PI / 4, context.width / context.height, .1, 1000);
 
         // need more lighting for sky backdrop
-        const light_position = vec4(0, 10, -10, 1);
+        const light_position = vec4(0, -10, 0, 1);
         program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
 
         // Draw Bird Avatar
@@ -169,26 +169,31 @@ export class FinalProject extends Scene {
         this.shapes.flappy.draw(context, program_state, model_transform_bird, this.materials.flappy);
         
         // Drawing the ground
-        let model_transform_ceiling = model_transform.times(Mat4.rotation(Math.PI/2, 1, 0, 0)).times(Mat4.translation(0, 10, -45)).times(Mat4.scale(1000, 20, 0.5));
+        let model_transform_ceiling = model_transform.times(Mat4.rotation(Math.PI/2, 1, 0, 0)).times(Mat4.translation(0, 10, -45)).times(Mat4.scale(1000, 50, 0.5));
         this.shapes.ground.draw(context, program_state, model_transform_ceiling, this.materials.sky2);
 
         let start_x_ground = -50
         for (let index = 0; index < 25; index++) {
-            let model_transform_ground = model_transform.times(Mat4.rotation(Math.PI/2, 1, 0, 0)).times(Mat4.translation(start_x_ground, 10, -2)).times(Mat4.scale(40, 40, 0.5));
+            let model_transform_ground = model_transform.times(Mat4.rotation(Math.PI/2, 1, 0, 0)).times(Mat4.translation(start_x_ground, 10, -2)).times(Mat4.scale(75, 75, 0.5));
             this.shapes.ground.draw(context, program_state, model_transform_ground, this.materials.dirt);
             start_x_ground = start_x_ground + 50;
         }
 
-        let start_x_background = -50
-        for (let index = 0; index < 25; index++) {
-            let model_transform_sky = model_transform.times(Mat4.translation(start_x_background, 25, -10)).times(Mat4.scale(25, 25, 0.5));
+        let start_x_background = -70
+        for (let index = 0; index < 50; index++) {
+            let model_transform_sky = model_transform.times(Mat4.translation(start_x_background, 30, -61)).times(Mat4.scale(35, 35, 0.5));
             this.shapes.ground.draw(context, program_state, model_transform_sky, this.materials.sky);
-            start_x_background = start_x_background + 50;
+            start_x_background = start_x_background + 70;
         }
-       
+
+        let start_x_background_2 = -70
+        for (let index = 0; index < 50; index++) {
+            let model_transform_sky = model_transform.times(Mat4.translation(start_x_background_2, 30, 61)).times(Mat4.scale(35, 35, 0.5));
+            this.shapes.ground.draw(context, program_state, model_transform_sky, this.materials.sky);
+            start_x_background_2 = start_x_background_2 + 70;
+        }        
         
-
-
+       
         let score = 0;
         const MAX_HEIGHT = 20; // total max height for both pipes
         let difficulty_adjustment = -MAX_HEIGHT/8;
