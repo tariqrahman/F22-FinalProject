@@ -57,7 +57,9 @@ export class FinalProject extends Scene {
             sky: new Material(textured,
                 {ambient: .7, diffusivity: .9, texture: new Texture("assets/flappy_background.png")}),
             sky2: new Material(textured,
-                {ambient: .7, diffusivity: .9, texture: new Texture("assets/sky.png")}),  
+                {ambient: .7, diffusivity: .9, texture: new Texture("assets/sky.png")}),
+            dirt: new Material(textured,
+                    {ambient: .7, diffusivity: .9, texture: new Texture("assets/dirt.png")}),
             flappy: new Material(textured,
                     {ambient: .7, diffusivity: .9, texture: new Texture("assets/flappy_bird-00.png")}),
             score0: new Material(textured, 
@@ -167,17 +169,21 @@ export class FinalProject extends Scene {
         this.shapes.flappy.draw(context, program_state, model_transform_bird, this.materials.flappy);
         
         // Drawing the ground
-        let model_transform_ground = model_transform.times(Mat4.rotation(Math.PI/2, 1, 0, 0)).times(Mat4.translation(0, 10, -2)).times(Mat4.scale(100, 20, 0.5));
-        this.shapes.ground.draw(context, program_state, model_transform_ground, this.floor);
-        let model_transform_ceiling = model_transform.times(Mat4.rotation(Math.PI/2, 1, 0, 0)).times(Mat4.translation(0, 10, -45)).times(Mat4.scale(100, 20, 0.5));
+        let model_transform_ceiling = model_transform.times(Mat4.rotation(Math.PI/2, 1, 0, 0)).times(Mat4.translation(0, 10, -45)).times(Mat4.scale(1000, 20, 0.5));
         this.shapes.ground.draw(context, program_state, model_transform_ceiling, this.materials.sky2);
 
-        let start_x = -50
-        
+        let start_x_ground = -50
         for (let index = 0; index < 25; index++) {
-            let model_transform_sky = model_transform.times(Mat4.translation(start_x, 25, -10)).times(Mat4.scale(25, 25, 0.5));
+            let model_transform_ground = model_transform.times(Mat4.rotation(Math.PI/2, 1, 0, 0)).times(Mat4.translation(start_x_ground, 10, -2)).times(Mat4.scale(40, 40, 0.5));
+            this.shapes.ground.draw(context, program_state, model_transform_ground, this.materials.dirt);
+            start_x_ground = start_x_ground + 50;
+        }
+
+        let start_x_background = -50
+        for (let index = 0; index < 25; index++) {
+            let model_transform_sky = model_transform.times(Mat4.translation(start_x_background, 25, -10)).times(Mat4.scale(25, 25, 0.5));
             this.shapes.ground.draw(context, program_state, model_transform_sky, this.materials.sky);
-            start_x = start_x + 50;
+            start_x_background = start_x_background + 50;
         }
        
         
