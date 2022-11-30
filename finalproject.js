@@ -87,7 +87,7 @@ export class FinalProject extends Scene {
         this.pipe_gaps = Array.from({length: this.NUM_PIPES}, () => this.getRandomNum(-25, -30)); // gap size between pipes
 
         // this.initial_camera_location = Mat4.translation(5,-10,-30);
-        this.initial_camera_location = Mat4.look_at(vec3(0, 30, 60), vec3(0, 20, 15), vec3(0, 1, 0));
+        this.initial_camera_location = Mat4.look_at(vec3(0, 20, 60), vec3(0, 17, 15), vec3(0, 1 , 0));
     }
 
     make_control_panel() {
