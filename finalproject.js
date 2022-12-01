@@ -22,7 +22,7 @@ export class FinalProject extends Scene {
         // Set start key to false
         this.start = false;
         this.jump = false;
-        this.jump_height = 0;
+        this.jump_height = 20;
         this.difficult = false;
         this.fall_speed = 0.06;
         this.start_time = Number.POSITIVE_INFINITY;
@@ -90,11 +90,19 @@ export class FinalProject extends Scene {
             
         // Number of pipes
         this.NUM_PIPES = 100;
-        this.pipe_heights = Array.from({length: this.NUM_PIPES}, () => this.getRandomNum(0, -15)); // height off base level
-        this.pipe_gaps = Array.from({length: this.NUM_PIPES}, () => this.getRandomNum(-25, -25)); // gap size between pipes
+        this.pipe_heights = Array.from({length: this.NUM_PIPES}, () => this.getRandomNum(0, -12)); // height off base level
+        this.pipe_gaps = Array.from({length: this.NUM_PIPES}, () => this.getRandomNum(-24, -26)); // gap size between pipes
 
         // this.initial_camera_location = Mat4.translation(5,-10,-30);
         this.initial_camera_location = Mat4.look_at(vec3(0, 20, 60), vec3(0, 17, 15), vec3(0, 1 , 0));
+    }
+
+    reset() {
+        this.start = false;
+        this.jump = false;
+        this.jump_height = 20;
+        this.difficult = false;
+        this.start_time = Number.POSITIVE_INFINITY;
     }
 
     make_control_panel() {
@@ -127,11 +135,7 @@ export class FinalProject extends Scene {
 
         // Reset button
         this.key_triggered_button("Reset", ["e"], () => {
-            this.start = false;
-            this.jump = false;
-            this.jump_height = 0;
-            this.difficult = false;
-            this.start_time = Number.POSITIVE_INFINITY;
+            this.reset();
         });
         this.new_line();
     }
@@ -157,7 +161,7 @@ export class FinalProject extends Scene {
         if (this.start) {
           this.jump_height -= this.fall_speed;
         }
-        let model_transform_bird = model_transform.times(Mat4.translation(0, 20 + this.jump_height, 0));
+        let model_transform_bird = model_transform.times(Mat4.translation(0, this.jump_height, 0));
         if (this.jump) {
             model_transform_bird = model_transform_bird.times(Mat4.translation(0, this.jump_height, 0))
         }
@@ -174,7 +178,7 @@ export class FinalProject extends Scene {
 
         let start_x_ground = -50
         for (let index = 0; index < 25; index++) {
-            let model_transform_ground = model_transform.times(Mat4.rotation(Math.PI/2, 1, 0, 0)).times(Mat4.translation(start_x_ground, 10, -2)).times(Mat4.scale(75, 75, 0.5));
+            let model_transform_ground = model_transform.times(Mat4.rotation(Math.PI/2, 1, 0, 0)).times(Mat4.translation(start_x_ground, 10, -3)).times(Mat4.scale(75, 75, 0.5));
             this.shapes.ground.draw(context, program_state, model_transform_ground, this.materials.dirt);
             start_x_ground = start_x_ground + 50;
         }
@@ -216,10 +220,26 @@ export class FinalProject extends Scene {
                 model_transform_top_tube = model_transform_top_tube.times(Mat4.translation(shift, 0, 0, 0))
             }
             
-            let x_coord = model_transform_bottom_tube[0][3];
+            let x_coord = model_transform_bottom_tube[0][3];            
             if (x_coord <= 0) {
                 score += 1;
             }
+            
+            if (x_coord <= 0.01 && x_coord >= -0.01) {
+                let bird_y_coord = model_transform_bird[1][3];
+                let gap_y_coord = -(pipe_height + (pipe_gap + difficulty_adjustment)/2);
+                let gap_size = -pipe_gap - MAX_HEIGHT;
+                
+                // console.log('gap', gap_y_coord)
+                // console.log('bird', bird_y_coord)
+                // console.log('space', gap_size)
+                
+                if (Math.abs(bird_y_coord - gap_y_coord) > gap_size/1.5) { // 1.5 for forgiveness
+                    console.log('You lose!');
+                    this.reset()
+                }
+            }
+            
             this.shapes.tube.draw(context, program_state, model_transform_bottom_tube, this.materials.tube);
             this.shapes.tube.draw(context, program_state, model_transform_top_tube, this.materials.tube);
         }
