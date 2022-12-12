@@ -1,5 +1,5 @@
-import {tiny} from './tiny-graphics.js';
-import {widgets} from './tiny-graphics-widgets.js';
+import {tiny} from '../tiny-graphics.js';
+import {widgets} from '../tiny-graphics-widgets.js';
 // Pull these names into this module's scope for convenience:
 const {
     Vector, Vector3, vec, vec3, vec4, color, Matrix, Mat4,
@@ -879,7 +879,7 @@ const Movement_Controls = defs.Movement_Controls =
             this.new_line();
             this.new_line();
 
-            this.key_triggered_button("Up", [" "], () => this.thrust[1] = -1, undefined, () => this.thrust[1] = 0);
+            this.key_triggered_button("Up", ["b"], () => this.thrust[1] = -1, undefined, () => this.thrust[1] = 0);
             this.key_triggered_button("Forward", ["w"], () => this.thrust[2] = 1, undefined, () => this.thrust[2] = 0);
             this.new_line();
             this.key_triggered_button("Left", ["a"], () => this.thrust[0] = 1, undefined, () => this.thrust[0] = 0);

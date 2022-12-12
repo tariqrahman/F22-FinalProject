@@ -1,70 +1,145 @@
-import {defs, tiny} from './common.js';
+import {defs, tiny} from './examples/common.js';
+import { Shape_From_File } from './examples/obj-file-demo.js';
+import { Shadow_Textured_Phong_Shader } from './examples/shadow-demo-shader.js';
 
 const {
-    Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene,
+    Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene, Texture
 } = tiny;
 
 export class FinalProject extends Scene {
+   
+ // Random number generator
+    getRandomNum(min, max) {
+        return Math.random() * (max - min) + min;
+    }
+    
     constructor() {
         // constructor(): Scenes begin by populating initial values like the Shapes and Materials they'll need.
         super();
 
+        const textured = new defs.Textured_Phong(1);
+
+        // Set start key to false
+        this.start = false;
+        this.jump = false;
+        this.jump_height = 20;
+        this.difficult = false;
+        this.fall_speed = 0.06;
+        this.start_time = Number.POSITIVE_INFINITY;
+
         // At the beginning of our program, load one of each of these shape definitions onto the GPU.
         this.shapes = {
-            torus: new defs.Torus(15, 15),
-            torus2: new defs.Torus(3, 15),
-            f1: new (defs.Subdivision_Sphere.prototype.make_flat_shaded_version())(1),
-            f2: new (defs.Subdivision_Sphere.prototype.make_flat_shaded_version())(2),
-            s3: new defs.Subdivision_Sphere(3),
-            s4: new defs.Subdivision_Sphere(4),
-            circle: new defs.Regular_2D_Polygon(1, 15),
-            // TODO:  Fill in as many additional shape instances as needed in this key/value table.
-            //        (Requirement 1)
+            bear: new defs.Cube(),
+            tube: new defs.Cylindrical_Tube(15, 15, [[0, 1], [0, 1]]),
+            ground: new defs.Cube(50, 50, [[0, 2], [0, 1]]),
+            sphere: new defs.Subdivision_Sphere(4),
+            cone: new defs.Closed_Cone(10,10),
+            box: new defs.Square(),
+            "flappy": new Shape_From_File("assets/flappy.obj")
         };
 
         // *** Materials
-
         this.materials = {
             test: new Material(new defs.Phong_Shader(),
                 {ambient: .4, diffusivity: .6, color: hex_color("#ffffff")}),
             test2: new Material(new Gouraud_Shader(),
                 {ambient: .4, diffusivity: .6, color: hex_color("#992828")}),
-            ring: new Material(new Ring_Shader(), {ambient: 1, diffusivity: 0, specularity: 0, color: hex_color("#ffffff")}),
-            sun: new Material(new defs.Phong_Shader(),
-                {ambient: 1, diffusivity: 0, specularity: 0, color: hex_color("#ffffff")}),
-            moon: new Material(new defs.Phong_Shader(),
-                {ambient: 1, diffusivity: 1, specularity: 0, color: hex_color("#C7E4EE")}),
-            p1: new Material(new defs.Phong_Shader(),
-                {ambient: 0, diffusivity: 1, specularity: 0, color: hex_color("#808080")}),
-            p2: new Material(new defs.Phong_Shader(),
-                {ambient: 0, diffusivity: 0.25, specularity: 1, color: hex_color("#80FFFF")}),
-            p2_Gourad: new Material(new Gouraud_Shader(),
-                {ambient: 0, diffusivity: 0.25, specularity: 1, color: hex_color("#80FFFF")}),
-            p3: new Material(new defs.Phong_Shader(),
-                {ambient: 0, diffusivity: 1, specularity: 1, color: hex_color("#B08040")}),
-            p4: new Material(new defs.Phong_Shader(),
-                {ambient: 0, diffusivity: 0, specularity: 1, color: hex_color("#C7E4EE")}),
-            
-            // TODO:  Fill in as many additional material objects as needed in this key/value table.
-            //        (Requirement 4)
+            tube: new Material(new defs.Phong_Shader(),
+                {ambient: .7, diffusivity: .6, color: hex_color("76C13A")}),
+            ground: new Material(new Gouraud_Shader(), 
+                {ambient: .3, diffusivity: .9, color: hex_color("#D2B48C")}),
+            eye: new Material(new Gouraud_Shader(), 
+                {ambient: .3, diffusivity: .9, color: hex_color("#000000")}),
+            beak: new Material(new Gouraud_Shader(), 
+                {ambient: .3, diffusivity: .9, color: hex_color("#FFD580")}),
+            feather: new Material(textured,
+                {ambient: 1, diffusivity: 1, specularity: 0,  texture: new Texture("assets/feather.jpg")}),
+            sky: new Material(textured,
+                {ambient: .9, diffusivity: .9, texture: new Texture("assets/flappy_background.png")}),
+            sky2: new Material(textured,
+                {ambient: .9, diffusivity: .9, texture: new Texture("assets/sky.png")}),
+            dirt: new Material(textured,
+                {ambient: .7, diffusivity: .9, texture: new Texture("assets/dirt.png")}),
+            flappy: new Material(textured,
+                {ambient: .9, diffusivity: .9, texture: new Texture("assets/flappy_bird-00.png")}),
+            score0: new Material(textured, 
+                {ambient: 1, texture: new Texture("assets/numbers/0.png"), color: color(0, 0, 0, 1)}),
+            score1: new Material(textured, 
+                {ambient: 1, texture: new Texture("assets/numbers/1.png"), color: color(0, 0, 0, 1)}),
+            score2: new Material(textured, 
+                {ambient: 1, texture: new Texture("assets/numbers/2.png"), color: color(0, 0, 0, 1)}),
+            score3: new Material(textured, 
+                {ambient: 1, texture: new Texture("assets/numbers/3.png"), color: color(0, 0, 0, 1)}),
+            score4: new Material(textured, 
+                {ambient: 1, texture: new Texture("assets/numbers/4.png"), color: color(0, 0, 0, 1)}),
+            score5: new Material(textured, 
+                {ambient: 1, texture: new Texture("assets/numbers/5.png"), color: color(0, 0, 0, 1)}),
+            score6: new Material(textured, 
+                {ambient: 1, texture: new Texture("assets/numbers/6.png"), color: color(0, 0, 0, 1)}),
+            score7: new Material(textured, 
+                {ambient: 1, texture: new Texture("assets/numbers/7.png"), color: color(0, 0, 0, 1)}),
+            score8: new Material(textured, 
+                {ambient: 1, texture: new Texture("assets/numbers/8.png"), color: color(0, 0, 0, 1)}),
+            score9: new Material(textured, 
+                {ambient: 1, texture: new Texture("assets/numbers/9.png"), color: color(0, 0, 0, 1)}),
+    
         }
 
-        this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
+        this.floor = new Material(new Gouraud_Shader(), 
+        {ambient: 0.3, diffusivity: .9, color: hex_color("#ffaf40")}),
+            
+        // Number of pipes
+        this.NUM_PIPES = 100;
+        this.pipe_heights = Array.from({length: this.NUM_PIPES}, () => this.getRandomNum(0, -12)); // height off base level
+        this.pipe_gaps = Array.from({length: this.NUM_PIPES}, () => this.getRandomNum(-24, -26)); // gap size between pipes
+
+        // this.initial_camera_location = Mat4.translation(5,-10,-30);
+        this.initial_camera_location = Mat4.look_at(vec3(0, 20, 60), vec3(0, 17, 15), vec3(0, 1 , 0));
+    }
+
+    reset() {
+        this.start = false;
+        this.jump = false;
+        this.jump_height = 20;
+        this.difficult = false;
+        this.start_time = Number.POSITIVE_INFINITY;
     }
 
     make_control_panel() {
         // Draw the scene's buttons, setup their actions and keyboard shortcuts, and monitor live measurements.
-        this.key_triggered_button("View solar system", ["Control", "0"], () => this.attached = () => this.planet_0);
+        // Start Key
+        this.key_triggered_button("Start", ["Enter"], () => {this.start = !this.start});
         this.new_line();
-        this.key_triggered_button("Attach to planet 1", ["Control", "1"], () => this.attached = () => this.planet_1);
-        this.key_triggered_button("Attach to planet 2", ["Control", "2"], () => this.attached = () => this.planet_2);
-        this.new_line();
-        this.key_triggered_button("Attach to planet 3", ["Control", "3"], () => this.attached = () => this.planet_3);
-        this.key_triggered_button("Attach to planet 4", ["Control", "4"], () => this.attached = () => this.planet_4);
-        this.new_line();
-        this.key_triggered_button("Attach to moon", ["Control", "m"], () => this.attached = () => this.moon);
-    }
 
+        // Jump Key
+        this.key_triggered_button("Jump", [" "], () => {this.jump_height += 2});
+        this.new_line();
+       
+        // Default POV
+        this.key_triggered_button("Default view", ["x"], () => this.attached = () => this.default_pov);
+        this.new_line();
+
+        // Change POV to bird
+        this.key_triggered_button("Bird view", ["v"], () => this.attached = () => this.bird_pov);
+        this.new_line();
+
+        // Add multiple difficulties
+        this.key_triggered_button("Toggle Hard Mode", ["h"], () => {this.difficult = !this.difficult});
+        this.new_line();
+        
+        this.key_triggered_button("-", ["j"], () => {this.fall_speed = Math.max(0.03, this.fall_speed - 0.01)});
+        this.live_string(box => {
+                box.textContent = "Fall Speed: " + Math.round((this.fall_speed * 100)) / 100});
+        this.key_triggered_button("+", ["u"], () => {this.fall_speed += 0.01});
+        this.new_line();
+
+        // Reset button
+        this.key_triggered_button("Reset", ["e"], () => {
+            this.reset();
+        });
+        this.new_line();
+    }
+    
     display(context, program_state) {
         // display():  Called once per frame of animation.
         // Setup -- This part sets up the scene's overall camera matrix, projection matrix, and lights:
@@ -73,17 +148,150 @@ export class FinalProject extends Scene {
             // Define the global camera and projection matrices, which are stored in program_state.
             program_state.set_camera(this.initial_camera_location);
         }
+        let t = program_state.animation_time / 1000, dt = program_state.animation_delta_time / 1000;
         let model_transform = Mat4.identity()
         program_state.projection_transform = Mat4.perspective(
             Math.PI / 4, context.width / context.height, .1, 1000);
+
+        // need more lighting for sky backdrop
+        const light_position = vec4(0, -10, 0, 1);
+        program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
+
+        // Draw Bird Avatar
+        if (this.start) {
+          this.jump_height -= this.fall_speed;
+        }
+        let model_transform_bird = model_transform.times(Mat4.translation(0, this.jump_height, 0));
+        if (this.jump) {
+            model_transform_bird = model_transform_bird.times(Mat4.translation(0, this.jump_height, 0))
+        }
+
+        let model_transform_bird_pov = model_transform_bird.times(Mat4.rotation(Math.PI / 2,0,1,0)).times(Mat4.translation(0,0,2).times(Mat4.rotation(Math.PI, 0, 1, 0)).times(Mat4.translation(0,0,-7)));
+       
+        this.bird_pov = model_transform_bird_pov;
+        model_transform_bird = model_transform_bird.times(Mat4.scale(1.25,1.25,1.25))
+        this.shapes.flappy.draw(context, program_state, model_transform_bird, this.materials.flappy);
         
-        // Resets to our initial solar system view (initial camera setting)
-        this.planet_0 = this.initial_camera_location;
+        // Drawing the ground
+        let model_transform_ceiling = model_transform.times(Mat4.rotation(Math.PI/2, 1, 0, 0)).times(Mat4.translation(0, 10, -45)).times(Mat4.scale(1000, 50, 0.5));
+        this.shapes.ground.draw(context, program_state, model_transform_ceiling, this.materials.sky2);
+
+        let start_x_ground = -50
+        for (let index = 0; index < 25; index++) {
+            let model_transform_ground = model_transform.times(Mat4.rotation(Math.PI/2, 1, 0, 0)).times(Mat4.translation(start_x_ground, 10, -3)).times(Mat4.scale(75, 75, 0.5));
+            this.shapes.ground.draw(context, program_state, model_transform_ground, this.materials.dirt);
+            start_x_ground = start_x_ground + 50;
+        }
+
+        let start_x_background = -70
+        for (let index = 0; index < 50; index++) {
+            let model_transform_sky = model_transform.times(Mat4.translation(start_x_background, 30, -61)).times(Mat4.scale(35, 35, 0.5));
+            this.shapes.ground.draw(context, program_state, model_transform_sky, this.materials.sky);
+            start_x_background = start_x_background + 70;
+        }
+
+        let start_x_background_2 = -70
+        for (let index = 0; index < 50; index++) {
+            let model_transform_sky = model_transform.times(Mat4.translation(start_x_background_2, 30, 61)).times(Mat4.scale(35, 35, 0.5));
+            this.shapes.ground.draw(context, program_state, model_transform_sky, this.materials.sky);
+            start_x_background_2 = start_x_background_2 + 70;
+        }        
+        
+       
+        let score = 0;
+        const MAX_HEIGHT = 20; // total max height for both pipes
+        let difficulty_adjustment = -MAX_HEIGHT/8;
+        if (!this.difficult) {
+            difficulty_adjustment = -MAX_HEIGHT/4;
+        }
+        
+        for (let index = 2; index < this.NUM_PIPES; index ++) { // start from 2 so bird has time to jump
+            let pipe_height = this.pipe_heights[index];
+            let pipe_gap = this.pipe_gaps[index];
+            
+            let model_transform_bottom_tube = model_transform.times(Mat4.rotation(Math.PI/2, 1, 0, 0)).times(Mat4.translation(7 * index, 0, pipe_height, 0)).times(Mat4.scale(1, 1, MAX_HEIGHT));
+            let model_transform_top_tube = model_transform.times(Mat4.rotation(Math.PI/2, 1, 0, 0)).times(Mat4.translation(7 * index, 0, pipe_height + pipe_gap + difficulty_adjustment, 0)).times(Mat4.scale(1, 1, MAX_HEIGHT));
+            
+            if (this.start)
+            { // need to change this approach so t starts only when the start button is hit
+                this.start_time = Math.min(this.start_time, t)
+                let shift = -(t - this.start_time)/0.5;
+                model_transform_bottom_tube = model_transform_bottom_tube.times(Mat4.translation(shift, 0, 0, 0))
+                model_transform_top_tube = model_transform_top_tube.times(Mat4.translation(shift, 0, 0, 0))
+            }
+            
+            let x_coord = model_transform_bottom_tube[0][3];            
+            if (x_coord <= 0) {
+                score += 1;
+            }
+            
+            if (x_coord <= 0.01 && x_coord >= -0.01) {
+                let bird_y_coord = model_transform_bird[1][3];
+                let gap_y_coord = -(pipe_height + (pipe_gap + difficulty_adjustment)/2);
+                let gap_size = -pipe_gap - MAX_HEIGHT;
+                
+                // console.log('gap', gap_y_coord)
+                // console.log('bird', bird_y_coord)
+                // console.log('space', gap_size)
+                
+                if (Math.abs(bird_y_coord - gap_y_coord) > gap_size/1.5) { // 1.5 for forgiveness
+                    console.log('You lose!');
+                    this.reset()
+                }
+            }
+            
+            this.shapes.tube.draw(context, program_state, model_transform_bottom_tube, this.materials.tube);
+            this.shapes.tube.draw(context, program_state, model_transform_top_tube, this.materials.tube);
+        }
+        
+        // console.log(score);
+        let n_digits = 0;
+        while (score > 0) {
+            let last_digit = score % 10;
+            let model_transform_score = model_transform.times(Mat4.translation(n_digits * -2, 35, 5, 0));
+            
+            switch(last_digit) {
+                case 0:
+                    this.shapes.box.draw(context, program_state, model_transform_score, this.materials.score0)
+                    break;
+                case 1:
+                    this.shapes.box.draw(context, program_state, model_transform_score, this.materials.score1)
+                    break;
+                case 2:
+                    this.shapes.box.draw(context, program_state, model_transform_score, this.materials.score2)
+                    break;
+                case 3:
+                    this.shapes.box.draw(context, program_state, model_transform_score, this.materials.score3)
+                    break;
+                case 4:
+                    this.shapes.box.draw(context, program_state, model_transform_score, this.materials.score4)
+                    break;
+                case 5:
+                    this.shapes.box.draw(context, program_state, model_transform_score, this.materials.score5)
+                    break;
+                case 6:
+                    this.shapes.box.draw(context, program_state, model_transform_score, this.materials.score6)
+                    break;
+                case 7:
+                    this.shapes.box.draw(context, program_state, model_transform_score, this.materials.score7)
+                    break;
+                case 8:
+                    this.shapes.box.draw(context, program_state, model_transform_score, this.materials.score8)
+                    break;
+                case 9:
+                    this.shapes.box.draw(context, program_state, model_transform_score, this.materials.score9)
+                    break;
+            }
+        n_digits += 1;
+        score = Math.floor(score/10);
+        }
+        
+        // Resets to our initial world view (initial camera setting) or changes to bird POV
+        this.default_pov = this.initial_camera_location;
         if (this.attached != undefined)
         {
-            // Requirement 6 Implementation
             let new_perspective = this.attached();
-            if(new_perspective !== this.planet_0)
+            if(new_perspective !== this.default_pov)
             {
                 new_perspective = new_perspective.times(Mat4.translation(0,0,5));
                 new_perspective = Mat4.inverse(new_perspective);
@@ -91,71 +299,12 @@ export class FinalProject extends Scene {
             new_perspective = new_perspective.map((x, i) => Vector.from(program_state.camera_inverse[i]).mix(x,0.1));
             program_state.set_camera(new_perspective);
         }
-
-        // TODO: Create Planets (Requirement 1)
-        // this.shapes.[XXX].draw([XXX]) // <--example
-        const t = program_state.animation_time / 2000, dt = program_state.animation_delta_time / 1000;
-        let sun_radius = 2 + Math.sin((Math.PI * 2/5)*t - (Math.PI/2));
-        // TODO: Lighting (Requirement 2)
-        const light_position = vec4(0, 5, 5, 1);
-        // The parameters of the Light are: position, color, size
-        program_state.lights = [new Light(light_position, color(1, -0.5 + sun_radius / 2, -0.5 + sun_radius / 2, 1 ), 10**sun_radius)];
-
-        // TODO:  Fill in matrix operations and drawing code to draw the solar system scene (Requirements 3 and 4)
-        
-        model_transform = Mat4.identity().times(Mat4.scale(sun_radius, sun_radius, sun_radius));
-        const swampy = hex_color("#80FFFF")
-        const gray = hex_color("#808080")
-        const muddy = hex_color("#B08040")
-        const soft_blue = hex_color("#C7E4EE")
-        let sun_color = color(1, -0.5 + sun_radius / 2, -0.5 + sun_radius / 2, 1)
-
-        // Draw Sun
-        this.shapes.s4.draw(context, program_state, model_transform, this.materials.sun.override({color: sun_color}));
-        
-        // Draw First Planet
-        model_transform = model_transform.times(Mat4.scale(1 / sun_radius, 1 / sun_radius, 1 / sun_radius).times(Mat4.rotation(t, 0, 1, 0))).times(Mat4.translation(5, 0, 0));
-        this.shapes.f2.draw(context, program_state, model_transform, this.materials.p1.override({color: gray, diffusivity: 1}));
-        
-        this.planet_1 = model_transform;
-
-        // Draw Second Planet
-        model_transform = model_transform.times(Mat4.translation(-5, 0, 0)).times(Mat4.rotation(-t, 0, 1, 0)).times(Mat4.rotation(0.9*t, 0, 1, 0)).times(Mat4.translation(8,0,0));
-
-        // Alternate Shader on Even/Odd Seconds
-        if (parseInt(t) % 2 == 1) {
-            this.shapes.s3.draw(context, program_state, model_transform, this.materials.p2_Gourad.override({color: swampy, diffusivity: 0.25, specularity: 1}));
-        } else {
-            this.shapes.s3.draw(context, program_state, model_transform, this.materials.p2.override({color: swampy, diffusivity: 0.25, specularity: 1}));
-        }
-
-        this.planet_2 = model_transform;
-        
-        // Draw Third Planet
-        model_transform = model_transform.times(Mat4.translation(-8, 0, 0)).times(Mat4.rotation(-0.9*t, 0, 1, 0)).times(Mat4.rotation(0.5*t, 0, 1, 0)).times(Mat4.translation(11,0,0));
-        this.shapes.s4.draw(context, program_state, model_transform, this.materials.p3.override({color: muddy, diffusivity: 1, specularity: 0.5}));
-
-        this.planet_3 = model_transform;
-
-        // Draw Ring
-        model_transform = model_transform.times(Mat4.scale(3, 3, 0.2))
-        this.shapes.torus.draw(context, program_state, model_transform, this.materials.ring);
-
-        // Draw Fourth Planet
-        model_transform = model_transform.times(Mat4.scale(1 / 3, 1 / 3, 5)).times(Mat4.translation(-11, 0, 0)).times(Mat4.rotation(-0.5*t, 0, 1, 0)).times(Mat4.rotation(0.25*t, 0, 1, 0)).times(Mat4.translation(14,0,0));
-        this.shapes.s4.draw(context, program_state, model_transform, this.materials.p4.override({color: soft_blue, specularity: 1}));
-
-        this.planet_4 = model_transform;
-
-        // Draw Moon
-        model_transform = model_transform.times(Mat4.rotation(2 * t, 0, 1, 0)).times(Mat4.translation(2.5,0,0));
-        this.shapes.f1.draw(context, program_state, model_transform, this.materials.moon.override({color: soft_blue}));
-
-        this.moon = model_transform;
-        
     }
 }
 
+
+
+// Custom Shaders
 class Gouraud_Shader extends Shader {
     // This is a Shader using Phong_Shader as template
     // TODO: Modify the glsl coder here to create a Gouraud Shader (Planet 2)
@@ -305,6 +454,7 @@ class Gouraud_Shader extends Shader {
     }
 }
 
+// Delete later if needed
 class Ring_Shader extends Shader {
     update_GPU(context, gpu_addresses, graphics_state, model_transform, material) {
         // update_GPU():  Defining how to synchronize our JavaScript's variables to the GPU's:

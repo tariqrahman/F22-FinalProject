@@ -1,4 +1,4 @@
-import {defs, tiny} from './common.js';
+import {defs, tiny} from './examples/common.js';
 import {FinalProject} from "./finalproject.js";
 
 // Pull these names into this module's scope for convenience:
